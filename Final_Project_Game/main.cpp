@@ -2,7 +2,7 @@
 #include <vector>
 #include <random>
 #include <cmath>
-
+#include <cstdlib>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
@@ -261,6 +261,7 @@ public:
         }
         setTexture(texture_);
         setTextureRect(sf::IntRect(0, 0, 0, 0));
+        setScale(0.1,0.1);
     }
     void animate(const sf::Time &elapsed){
         float dt = elapsed.asSeconds();
@@ -301,7 +302,8 @@ public:
             std::cerr << "Could not load texture" << path << std::endl;
         }
         setTexture(texture_);
-        setTextureRect(sf::IntRect(0, 0, 0, 0));
+
+        setScale(0.1,0.1);
 
 
     }
@@ -311,12 +313,14 @@ public:
 
         if(t_>0.09){
             fragments_index++;
+
             t_=0;
         }
         if(fragments_index>=rectVector.size()){
             fragments_index=0;
         }
         setTextureRect(rectVector[fragments_index]);
+
     }
 
     void add_animation_frame(const sf::IntRect& frame){
@@ -335,29 +339,38 @@ class monster :public sf::Sprite
 private:
     sf::Texture texture_;
     sf::Vector2f playerPosition_;
+    std::vector<sf::Texture> frames_;
+    float frameTime_;
+    float totalTime_;
+    int currentFrame_;
+
 
 
 public:
     float speed;
-    monster(const std::string& path)
+    monster(const std::vector<std::string>& framePaths, float frameTime)
+            : frameTime_(frameTime), totalTime_(0), currentFrame_(0)
     {
-        speed = 20 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(100-20)));
-        if (!texture_.loadFromFile(path)) {
-            std::cerr << "Could not load texture" << path << std::endl;
-        }
-        setTexture(texture_);
-        setScale(0.3,0.3);
+                speed = 15 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(100-15)));
+                if (!loadFramesFromTextures(framePaths)) {
+                std::cerr << "Failed to load frames from textures" << std::endl;
+            }
+            setTexture(frames_[0]);
+            setTextureRect(sf::IntRect(0, 0, frames_[0].getSize().x, frames_[0].getSize().y));
+            setScale(0.3,0.3);
 
 
 
     }
-    void setPlayerPosition(const sf::Vector2f& position) {
+    void setPlayerPosition(const sf::Vector2f& position)
+        {
             playerPosition_ = position;
         }
 
-    void updatePosition(float deltaTime, float speed) {
-        sf::Vector2f currentPosition = getPosition();
 
+    void followPlayer(float deltaTime, float speed)
+    {
+        sf::Vector2f currentPosition = getPosition();
 
         sf::Vector2f direction = playerPosition_ - currentPosition;
         float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
@@ -368,7 +381,50 @@ public:
         sf::Vector2f newPosition = currentPosition + direction * speed * deltaTime;
         setPosition(newPosition);
     }
+
+    bool loadFramesFromTextures(const std::vector<std::string>& paths) {
+            for (const std::string& path : paths) {
+                sf::Texture frame;
+                if (!frame.loadFromFile(path)) {
+                    return false;
+                }
+                frames_.push_back(frame);
+            }
+            return true;
+        }
+
+        void animate(float deltaTime) {
+            totalTime_ += deltaTime;
+            if (totalTime_ >= frameTime_) {
+                totalTime_ -= frameTime_;
+                currentFrame_ = (currentFrame_ + 1) % frames_.size();
+                setTexture(frames_[currentFrame_]);
+            }
+        }
+        bool loadFramesFromTextures2(const std::vector<std::string>& paths) {
+                for (const std::string& path : paths) {
+                    sf::Texture frame;
+                    if (!frame.loadFromFile(path)) {
+                        return false;
+                    }
+                    frames_.push_back(frame);
+                }
+                return true;
+            }
+
+            void animate2(float deltaTime) {
+                totalTime_ += deltaTime;
+                if (totalTime_ >= frameTime_) {
+                    totalTime_ -= frameTime_;
+                    currentFrame_ = (currentFrame_ + 1) % frames_.size();
+                    setTexture(frames_[currentFrame_]);
+                }
+            }
+
+
 };
+
+
 
 class serce:public sf::Sprite
 {
@@ -390,6 +446,7 @@ public:
 
 
 
+
 int main()
 {
 
@@ -397,7 +454,7 @@ int main()
     sf::Clock clock;
 
     sf::Texture grass_tex;
-    if (!grass_tex.loadFromFile("grass.png")) {
+    if (!grass_tex.loadFromFile("TILE_1G.png")) {
         std::cerr << "Could not load texture" << std::endl;
         return 1;
     }
@@ -428,7 +485,7 @@ int main()
         (float)window.getSize().x / grass_tex.getSize().x,
         (float)window.getSize().y / grass_tex.getSize().y);
 
-
+    int Score=0;
     WeaponSprite knife("knife.png");
 
     AxeSprite axe("axe.png");
@@ -444,6 +501,7 @@ int main()
     fireb.add_animation_frame(sf::IntRect(454, 275, 58, 25));
 
     ExplosionSprite expl("explosion.png");
+
     expl.add_animation_frame(sf::IntRect(30, 5, 70, 90));
     expl.add_animation_frame(sf::IntRect(206, 5, 66, 90));
     expl.add_animation_frame(sf::IntRect(298, 5, 72, 90));
@@ -455,22 +513,59 @@ int main()
     expl.add_animation_frame(sf::IntRect(864, 5, 88, 90));
     expl.add_animation_frame(sf::IntRect(956, 5, 94, 90));
     expl.add_animation_frame(sf::IntRect(1055, 5, 89, 90));
+    expl.setScale(0.1,0.1);
 //    expl.add_animation_frame(sf::IntRect(30, 5, 90, 90));
 
     /*remember to change it to more effective*/
     std::vector<sf::Sprite> walls;
+    std::vector<std::string> framePaths = {
+           "go_1.png",
+           "go_2.png",
+           "go_3.png",
+           "go_4.png",
+           "go_5.png",
+           "go_6.png",
+            "go_7.png",
+            "go_8.png",
+        "go_9.png",
+        "go_10.png"
+       };
+
+    std::vector<std::string> framePaths1 = {
+            "die_1.png",
+            "die_2.png",
+            "die_3.png",
+            "die_4.png",
+            "die_5.png",
+            "die_6.png"
+       };
 
 
-    monster monster1("zombie.png");
-    monster monster2("zombie.png");
-    monster monster3("zombie.png");
-    monster monster4("zombie.png");
-    monster monster5("zombie.png");
-    monster monster6("zombie.png");
-    monster monster7("zombie.png");
 
-    monster1.setPosition(30, 100);
-    monster2.setPosition(700, 340);
+    monster Monster1(framePaths, 0.2f);
+    monster Monster2(framePaths, 0.2f);
+    monster Monster3(framePaths, 0.2f);
+    monster Monster4(framePaths, 0.2f);
+    monster Monster5(framePaths, 0.2f);
+    monster Monster6(framePaths, 0.2f);
+    monster Monster7(framePaths, 0.2f);
+    monster Monster8(framePaths, 0.2f);
+
+    monster monsterdead(framePaths1, 0.2f);
+
+
+
+
+
+
+
+    Monster1.setPosition(10,10);
+    Monster2.setPosition(10,210);
+    Monster3.setPosition(10,510);
+    Monster4.setPosition(700,10);
+    Monster5.setPosition(700,210);
+    Monster6.setPosition(700,410);
+
 
     serce serce1("heart.png");
     serce serce2("heart.png");
@@ -492,14 +587,46 @@ int main()
     serca.push_back(serce5);
 
     std::vector<monster> zombies;
-    zombies.push_back(monster1);
-    zombies.push_back(monster2);
-    //zombies.push_back(monster3);
-    //zombies.push_back(monster4);
-    //zombies.push_back(monster5);
-    //zombies.push_back(monster6);
-    //zombies.push_back(monster7);
+    zombies.push_back(Monster1);
+    zombies.push_back(Monster2);
+    zombies.push_back(Monster3);
+    //zombies.push_back(Monster4);
+    //zombies.push_back(Monster5);
+    //zombies.push_back(Monster6);
+    //zombies.push_back(Monster7);
 
+
+
+
+
+    const float safeSpace = 200.0f;
+
+
+    sf::Vector2f characterPosition = guy.getPosition();
+    sf::FloatRect characterBounds = guy.getGlobalBounds();
+
+
+    sf::Vector2u windowSize = window.getSize();
+
+
+    float randomX, randomY;
+    do {
+
+        randomX = rand() % windowSize.x;
+        randomY = rand() % windowSize.y;
+
+
+        float dx = randomX - characterPosition.x;
+        float dy = randomY - characterPosition.y;
+        float distance = std::sqrt(dx * dx + dy * dy);
+
+
+            if (distance > safeSpace)
+                {
+                    break;
+                }
+
+    }while (true);
 
 
 
@@ -514,6 +641,21 @@ int main()
     bool IsSpriteAdded2=false;
     bool IsSpriteAdded3=false;
     bool IsSpriteAdded4=false;
+    int zycia=0;
+    bool intersectionOccurred = false;
+    bool is_dead= false;
+
+    sf::Font font;
+    if (!font.loadFromFile("arial.ttf")) {
+        // Error handling - Failed to load the font
+        // Make sure the font file name and extension are correct
+    }
+    sf::Text scoreText;
+
+    scoreText.setFont(font);
+    scoreText.setCharacterSize(30);
+    scoreText.setFillColor(sf::Color::White);
+    scoreText.setPosition(300,10);
 
     while (window.isOpen())
     {
@@ -533,13 +675,14 @@ int main()
         }
         if(counter2>3.0 && !IsSpriteAdded4){
             IsSpriteAdded4=true;
-            expl.setPosition(guy.getPosition()+sf::Vector2f(-120,-200));
-            expl.setScale(3,3);
+            expl.setPosition(guy.getPosition()+sf::Vector2f(-80 ,-100));
+            expl.setScale(1.7,1.7);
         }
         if(counter2>3.99 && IsSpriteAdded4==true){
             IsSpriteAdded4=false;
             counter2=0;
         }
+
 
         sf::Event event;
         while (window.pollEvent(event))
@@ -599,6 +742,46 @@ int main()
                 IsSpriteAdded2=true;
             }
         }
+        sf::FloatRect guy_bounds = guy.getGlobalBounds();
+
+        bool currentIntersection = false;
+
+            for (auto& monster : zombies)
+            {
+                sf::FloatRect monster_bounds = monster.getGlobalBounds();
+                if (monster_bounds.intersects(guy_bounds))
+                {
+                    currentIntersection = true;
+                    break;
+                }
+            }
+
+            if (currentIntersection && !intersectionOccurred)
+            {
+                intersectionOccurred = true;
+
+                if (zycia < 5)
+                {
+                    serca[zycia].setScale(0, 0);
+                    zycia++;
+                }
+
+                if (zycia == 5)
+                {
+                    std::cout << "Your score is: " << Score << " ";
+                    // Print the score or perform any other desired actions
+                    window.close();
+                }
+            }
+            else if (!currentIntersection)
+            {
+                intersectionOccurred = false;
+            }
+
+
+
+
+
 
 
         sf::Vector2f knife_pos = knife.getPosition();
@@ -626,13 +809,14 @@ int main()
         window.draw(guy);      
 
 
-        for (auto &monster: zombies)
-        {
-            window.draw(monster);
-            monster.setPlayerPosition(guy.getPosition());
-            monster.updatePosition(dt, monster.speed);
 
-        }
+        for (auto& monster : zombies) {
+                monster.setPlayerPosition(guy.getPosition());
+                monster.followPlayer(dt, monster.speed);
+                monster.animate(dt);
+                window.draw(monster);
+            }
+
         for (auto &serce: serca)
         {
             window.draw(serce);
@@ -663,6 +847,43 @@ int main()
             expl.animate(elapsed);
             window.draw(expl);
         }
+
+        sf::FloatRect expl_bounds = expl.getGlobalBounds();
+        sf::Vector2f position;
+        sf::FloatRect knife_bounds = knife.getGlobalBounds();
+        for (auto& monster : zombies)
+        {
+
+
+            sf::FloatRect monster_bounds = monster.getGlobalBounds();
+
+            if (monster_bounds.intersects(expl_bounds))
+            {
+
+                Score += 10;
+
+                is_dead= true;
+
+                position = monster.getPosition();
+                monster.setPosition(randomX, randomY);
+            }
+
+             if (monster_bounds.intersects(knife_bounds))
+             {
+                 Score += 20;
+                 position = monster.getPosition();
+                 monster.setPosition(randomX, randomY);
+             }
+        }
+
+
+                std::string scoreString = "Score: " + std::to_string(Score);
+
+                scoreText.setString(scoreString);
+                window.draw(scoreText);
+
+
+
 
         window.display();
     }
