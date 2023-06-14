@@ -422,6 +422,22 @@ public:
             }
 
 
+            void die_monster(const sf::Vector2f& playerPosition, float distance)
+            {
+
+                    const float PI = 3.14159265358979323846;
+                    float angle = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2 * PI;
+
+
+                    float offsetX = std::cos(angle) * distance;
+                    float offsetY = std::sin(angle) * distance;
+                    sf::Vector2f newPosition = playerPosition + sf::Vector2f(offsetX, offsetY);
+
+                    setPosition(newPosition);
+            }
+
+
+
 };
 
 
@@ -453,17 +469,11 @@ int main()
     sf::RenderWindow window(sf::VideoMode(800, 600), "My window");
     sf::Clock clock;
 
-    sf::Texture grass_tex;
-    if (!grass_tex.loadFromFile("TILE_1G.png")) {
-        std::cerr << "Could not load texture" << std::endl;
-        return 1;
-    }
 
-    sf::Texture wall_tex;
-    if (!wall_tex.loadFromFile("wall.png")) {
-        std::cerr << "Could not load texture" << std::endl;
-        return 1;
-    }
+
+    sf::Texture texture_wall;
+    if(!texture_wall.loadFromFile("TILE_1G.png")) { return 1; }
+    texture_wall.setRepeated(true);
 
     CustomSprite guy("character.png");
 
@@ -479,11 +489,12 @@ int main()
 
 
     sf::Sprite grass;
-    grass.setTexture(grass_tex);
+    grass.setTexture(texture_wall);
 
-    grass.setScale(
-        (float)window.getSize().x / grass_tex.getSize().x,
-        (float)window.getSize().y / grass_tex.getSize().y);
+
+    grass.setTexture(texture_wall);
+    grass.setScale(1.5,1.5);
+    grass.setTextureRect(sf::IntRect(0, 0, 1500, 1500));
 
     int Score=0;
     WeaponSprite knife("knife.png");
@@ -590,9 +601,9 @@ int main()
     zombies.push_back(Monster1);
     zombies.push_back(Monster2);
     zombies.push_back(Monster3);
-    //zombies.push_back(Monster4);
-    //zombies.push_back(Monster5);
-    //zombies.push_back(Monster6);
+    zombies.push_back(Monster4);
+    zombies.push_back(Monster5);
+    zombies.push_back(Monster6);
     //zombies.push_back(Monster7);
 
 
@@ -607,30 +618,6 @@ int main()
 
 
     sf::Vector2u windowSize = window.getSize();
-
-
-    float randomX, randomY;
-    do {
-
-        randomX = rand() % windowSize.x;
-        randomY = rand() % windowSize.y;
-
-
-        float dx = randomX - characterPosition.x;
-        float dy = randomY - characterPosition.y;
-        float distance = std::sqrt(dx * dx + dy * dy);
-
-
-            if (distance > safeSpace)
-                {
-                    break;
-                }
-
-    }while (true);
-
-
-
-
 
 
 
@@ -676,7 +663,7 @@ int main()
         if(counter2>3.0 && !IsSpriteAdded4){
             IsSpriteAdded4=true;
             expl.setPosition(guy.getPosition()+sf::Vector2f(-80 ,-100));
-            expl.setScale(1.7,1.7);
+            expl.setScale(0,0);
         }
         if(counter2>3.99 && IsSpriteAdded4==true){
             IsSpriteAdded4=false;
@@ -851,6 +838,7 @@ int main()
         sf::FloatRect expl_bounds = expl.getGlobalBounds();
         sf::Vector2f position;
         sf::FloatRect knife_bounds = knife.getGlobalBounds();
+         sf::FloatRect axe_bounds = axe.getGlobalBounds();
         for (auto& monster : zombies)
         {
 
@@ -862,17 +850,22 @@ int main()
 
                 Score += 10;
 
-                is_dead= true;
+                monster.die_monster(guy.getPosition(),400);
 
-                position = monster.getPosition();
-                monster.setPosition(randomX, randomY);
+
             }
 
              if (monster_bounds.intersects(knife_bounds))
              {
                  Score += 20;
-                 position = monster.getPosition();
-                 monster.setPosition(randomX, randomY);
+                 monster.die_monster(guy.getPosition(),400);
+
+             }
+
+             if (monster_bounds.intersects(axe_bounds))
+             {
+
+                 monster.die_monster(guy.getPosition(),400);
              }
         }
 
