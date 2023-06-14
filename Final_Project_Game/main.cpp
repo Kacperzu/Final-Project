@@ -873,6 +873,7 @@ int main()
              {
 
                  monster.die_monster(guy.getPosition(),400);
+                 Score += 50;
              }
         }
 
