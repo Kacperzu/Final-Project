@@ -625,7 +625,7 @@ int main()
 
 
     bool IsSpriteAdded=false;
-    bool IsSpriteAdded2=false;
+    bool IsSpriteAdded2=true;
     bool IsSpriteAdded3=false;
     bool IsSpriteAdded4=false;
     int zycia=0;
@@ -643,6 +643,13 @@ int main()
     scoreText.setCharacterSize(30);
     scoreText.setFillColor(sf::Color::White);
     scoreText.setPosition(300,10);
+
+    sf::Text ExitText;
+
+    ExitText.setFont(font);
+    ExitText.setCharacterSize(15);
+    ExitText.setFillColor(sf::Color::White);
+    ExitText.setPosition(20,10);
 
     while (window.isOpen())
     {
@@ -724,10 +731,10 @@ int main()
                 speed_y=0;
 
             }
-            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Num2 && !IsSpriteAdded2)
-            {
-                IsSpriteAdded2=true;
-            }
+//            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Num2 && !IsSpriteAdded2)
+//            {
+//                IsSpriteAdded2=true;
+//            }
         }
         sf::FloatRect guy_bounds = guy.getGlobalBounds();
 
@@ -871,9 +878,13 @@ int main()
 
 
                 std::string scoreString = "Score: " + std::to_string(Score);
+        std::string exitString = "Press Esc to exit";
 
                 scoreText.setString(scoreString);
                 window.draw(scoreText);
+
+                ExitText.setString(exitString);
+                window.draw(ExitText);
 
 
 
