@@ -302,6 +302,8 @@ public:
         setTexture(texture_);
 
         setScale(0.1,0.1);
+
+
     }
     void animate(const sf::Time &elapsed){
         float dt = elapsed.asSeconds();
@@ -340,29 +342,23 @@ private:
     float totalTime_;
     int currentFrame_;
 
-
-
 public:
     float speed;
     monster(const std::vector<std::string>& framePaths, float frameTime)
             : frameTime_(frameTime), totalTime_(0), currentFrame_(0)
     {
-                speed = 15 + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(100-15)));
+                speed = 15 + static_cast<float>(rand())/( static_cast <float> (RAND_MAX/(100-15)));
                 if (!loadFramesFromTextures(framePaths)) {
                 std::cerr << "Failed to load frames from textures" << std::endl;
             }
             setTexture(frames_[0]);
             setTextureRect(sf::IntRect(0, 0, frames_[0].getSize().x, frames_[0].getSize().y));
             setScale(0.3,0.3);
-
-
-
     }
     void setPlayerPosition(const sf::Vector2f& position)
         {
             playerPosition_ = position;
         }
-
 
     void followPlayer(float deltaTime, float speed)
     {
@@ -431,9 +427,6 @@ public:
 
                     setPosition(newPosition);
             }
-
-
-
 };
 
 class serce:public sf::Sprite
@@ -459,8 +452,6 @@ int main()
     sf::RenderWindow window(sf::VideoMode(800, 600), "My window");
     sf::Clock clock;
 
-
-
     sf::Texture texture_wall;
     if(!texture_wall.loadFromFile("TILE_1G.png")) { return 1; }
     texture_wall.setRepeated(true);
@@ -477,10 +468,8 @@ int main()
     guy.add_animation_frame(sf::IntRect(350, 0, 37, 37)); // hero running frame 1
     guy.add_animation_frame(sf::IntRect(400, 0, 37, 37)); // hero running frame 1
 
-
     sf::Sprite grass;
     grass.setTexture(texture_wall);
-
 
     grass.setTexture(texture_wall);
     grass.setScale(1.5,1.5);
@@ -541,8 +530,6 @@ int main()
             "die_6.png"
        };
 
-
-
     monster Monster1(framePaths, 0.2f);
     monster Monster2(framePaths, 0.2f);
     monster Monster3(framePaths, 0.2f);
@@ -554,19 +541,12 @@ int main()
 
     monster monsterdead(framePaths1, 0.2f);
 
-
-
-
-
-
-
     Monster1.setPosition(10,10);
     Monster2.setPosition(10,210);
     Monster3.setPosition(10,510);
     Monster4.setPosition(700,10);
     Monster5.setPosition(700,210);
     Monster6.setPosition(700,410);
-
 
     serce serce1("heart.png");
     serce serce2("heart.png");
@@ -596,31 +576,20 @@ int main()
     zombies.push_back(Monster6);
     //zombies.push_back(Monster7);
 
-
-
-
-
     const float safeSpace = 200.0f;
-
 
     sf::Vector2f characterPosition = guy.getPosition();
     sf::FloatRect characterBounds = guy.getGlobalBounds();
 
-
     sf::Vector2u windowSize = window.getSize();
-
-
-
-
-
 
     bool IsSpriteAdded=false;
     bool IsSpriteAdded2=true;
     bool IsSpriteAdded3=false;
     bool IsSpriteAdded4=false;
-    int zycia=0;
     bool intersectionOccurred = false;
     bool is_dead= false;
+    int zycia=0;
 
     sf::Font font;
     if (!font.loadFromFile("arial.ttf")) {
@@ -654,7 +623,7 @@ int main()
             counter=0;
             fireb.setPosition(guy.getPosition()+sf::Vector2f(10,-65));
             fireb.setScale(3,3);
-            speed_x_fb=750;
+            speed_x_fb=250;
             speed_y_fb=0;
         }
         if(counter2>3.0 && !IsSpriteAdded4){
@@ -721,10 +690,6 @@ int main()
                 speed_y=0;
 
             }
-//            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Num2 && !IsSpriteAdded2)
-//            {
-//                IsSpriteAdded2=true;
-//            }
         }
         sf::FloatRect guy_bounds = guy.getGlobalBounds();
 
@@ -762,12 +727,6 @@ int main()
                 intersectionOccurred = false;
             }
 
-
-
-
-
-
-
         sf::Vector2f knife_pos = knife.getPosition();
         sf::Vector2u window_pos = window.getSize();
         if(knife_pos.x < 0.f || knife_pos.y < 0.f ||
@@ -786,13 +745,9 @@ int main()
         fireb.MoveIt(elapsed);
         fireb.animate(elapsed);
 
-//        axe.setPosition(guy.getPosition());
-
         window.clear(sf::Color::Black);
         window.draw(grass);
-        window.draw(guy);      
-
-
+        window.draw(guy);
 
         for (auto& monster : zombies) {
                 monster.setPlayerPosition(guy.getPosition());
@@ -805,10 +760,7 @@ int main()
         {
             window.draw(serce);
 
-
         }
-
-
 
         if(IsSpriteAdded)
         {
@@ -821,10 +773,10 @@ int main()
             axe.rotate(0.01);
         }
 
-        /*if(IsSpriteAdded3)
+        if(IsSpriteAdded3)
         {
             window.draw(fireb);
-        }*/
+        }
 
         if(IsSpriteAdded4)
         {
@@ -868,7 +820,7 @@ int main()
         }
 
 
-                std::string scoreString = "Score: " + std::to_string(Score);
+        std::string scoreString = "Score: " + std::to_string(Score);
         std::string exitString = "Press Esc to exit";
 
                 scoreText.setString(scoreString);
