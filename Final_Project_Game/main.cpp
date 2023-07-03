@@ -212,8 +212,6 @@ private:
     sf::Texture texture_;
     std::vector<sf::IntRect> rectVector;
     std::vector<sf::IntRect> rectVector_stand;
-
-
 };
 
 class WeaponSprite : public sf::Sprite
@@ -304,8 +302,6 @@ public:
         setTexture(texture_);
 
         setScale(0.1,0.1);
-
-
     }
     void animate(const sf::Time &elapsed){
         float dt = elapsed.asSeconds();
@@ -440,8 +436,6 @@ public:
 
 };
 
-
-
 class serce:public sf::Sprite
 {
 private:
@@ -458,10 +452,6 @@ public:
     }
 
 };
-
-
-
-
 
 int main()
 {
