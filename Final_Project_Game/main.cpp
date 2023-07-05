@@ -6,8 +6,6 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
-/*new branch idk*/
-
 int speed_x=0;
 int speed_y=0;
 int speed_x_fb=0;
@@ -23,7 +21,6 @@ public:
         }
         setTexture(texture_);
         setTextureRect(sf::IntRect(0, 0, 35, 37));
-
         setScale(2,2);
         setOrigin(sf::Vector2f(25,25));
         setPosition(390, 290);
@@ -301,96 +298,27 @@ private:
 };
 
 /*monster class - remember to change
--------------------------------------------------------------------------------------------------------*/
-class monster : public sf::Sprite
+--------------------------------------------------------------------------------------*/
+class MonsterSprite : public sf::Sprite
 {
 public:
-    float speed;
-    monster(const std::vector<std::string>& framePaths, float frameTime)
-            : frameTime_(frameTime), totalTime_(0), currentFrame_(0)
-    {
-                speed = 15 + static_cast<float>(rand())/( static_cast <float> (RAND_MAX/(100-15)));
-                if (!loadFramesFromTextures(framePaths)) {
-                std::cerr << "Failed to load frames from textures" << std::endl;
-            }
-            setTexture(frames_[0]);
-            setTextureRect(sf::IntRect(0, 0, frames_[0].getSize().x, frames_[0].getSize().y));
-            setScale(0.3,0.3);
-    }
-    void setPlayerPosition(const sf::Vector2f& position)
-        {
-            playerPosition_ = position;
-        }
+    MonsterSprite(const std::string& path){
 
-    void followPlayer(float deltaTime, float speed)
-    {
-        sf::Vector2f currentPosition = getPosition();
-        sf::Vector2f direction = playerPosition_ - currentPosition;
-        float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-        if (length != 0) {
-            direction /= length;
+        if (!texture_.loadFromFile(path)) {
+            std::cerr << "Could not load texture" << path << std::endl;
         }
-
-        sf::Vector2f newPosition = currentPosition + direction * speed * deltaTime;
-        setPosition(newPosition);
+        setTexture(texture_);
+        setTextureRect(sf::IntRect(0, 0, 35, 37));
+        setScale(0.3,0.3);
     }
 
-    bool loadFramesFromTextures(const std::vector<std::string>& paths) {
-            for (const std::string& path : paths) {
-                sf::Texture frame;
-                if (!frame.loadFromFile(path)) {
-                    return false;
-                }
-                frames_.push_back(frame);
-            }
-            return true;
-        }
-
-        void animate(float deltaTime) {
-            totalTime_ += deltaTime;
-            if (totalTime_ >= frameTime_) {
-                totalTime_ -= frameTime_;
-                currentFrame_ = (currentFrame_ + 1) % frames_.size();
-                setTexture(frames_[currentFrame_]);
-            }
-        }
-        bool loadFramesFromTextures2(const std::vector<std::string>& paths) {
-                for (const std::string& path : paths) {
-                    sf::Texture frame;
-                    if (!frame.loadFromFile(path)) {
-                        return false;
-                    }
-                    frames_.push_back(frame);
-                }
-                return true;
-            }
-
-            void animate2(float deltaTime) {
-                totalTime_ += deltaTime;
-                if (totalTime_ >= frameTime_) {
-                    totalTime_ -= frameTime_;
-                    currentFrame_ = (currentFrame_ + 1) % frames_.size();
-                    setTexture(frames_[currentFrame_]);
-                }
-            }
-
-            void die_monster(const sf::Vector2f& playerPosition, float distance)
-            {
-                const float PI = 3.14159265358979323846;
-                float angle = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2 * PI;
-                float offsetX = std::cos(angle) * distance;
-                float offsetY = std::sin(angle) * distance;
-                sf::Vector2f newPosition = playerPosition + sf::Vector2f(offsetX, offsetY);
-                setPosition(newPosition);
-            }
 private:
-    sf::Texture texture_;
-    sf::Vector2f playerPosition_;
-    std::vector<sf::Texture> frames_;
     float frameTime_;
     float totalTime_;
     int currentFrame_;
-
+    sf::Texture texture_;
+    sf::Vector2f playerPosition_;
+    std::vector<sf::Texture> frames_;
 };
 
 class serce : public sf::Sprite
@@ -492,16 +420,16 @@ int main()
             "die_6.png"
        };
 
-    monster Monster1(framePaths, 0.2f);
-    monster Monster2(framePaths, 0.2f);
-    monster Monster3(framePaths, 0.2f);
-    monster Monster4(framePaths, 0.2f);
-    monster Monster5(framePaths, 0.2f);
-    monster Monster6(framePaths, 0.2f);
-    monster Monster7(framePaths, 0.2f);
-    monster Monster8(framePaths, 0.2f);
+    MonsterSprite Monster1(framePaths, 0.2f);
+    MonsterSprite Monster2(framePaths, 0.2f);
+    MonsterSprite Monster3(framePaths, 0.2f);
+    MonsterSprite Monster4(framePaths, 0.2f);
+    MonsterSprite Monster5(framePaths, 0.2f);
+    MonsterSprite Monster6(framePaths, 0.2f);
+    MonsterSprite Monster7(framePaths, 0.2f);
+    MonsterSprite Monster8(framePaths, 0.2f);
 
-    monster monsterdead(framePaths1, 0.2f);
+    MonsterSprite monsterdead(framePaths1, 0.2f);
 
     Monster1.setPosition(10,10);
     Monster2.setPosition(10,210);
