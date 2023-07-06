@@ -20,9 +20,9 @@ public:
             std::cerr << "Could not load texture" << path << std::endl;
         }
         setTexture(texture_);
-        setTextureRect(sf::IntRect(0, 0, 35, 37));
+        setTextureRect(sf::IntRect(0, 0, 0, 0));
         setScale(2,2);
-        setOrigin(sf::Vector2f(25,25));
+        setOrigin(sf::Vector2f(15,15));
         setPosition(390, 290);
     }
 
@@ -265,7 +265,7 @@ public:
         }
         setTexture(texture_);
         setTextureRect(sf::IntRect(0, 0, 0, 0));
-        setScale(0.1,0.1);
+        setScale(0.1, 0.1);
     }
     void animate(const sf::Time &elapsed){
         float dt = elapsed.asSeconds();
@@ -297,8 +297,6 @@ private:
     unsigned int fragments_index = 0;
 };
 
-/*monster class - remember to change
---------------------------------------------------------------------------------------*/
 class MonsterSprite : public sf::Sprite
 {
 public:
@@ -308,23 +306,70 @@ public:
             std::cerr << "Could not load texture" << path << std::endl;
         }
         setTexture(texture_);
-        setTextureRect(sf::IntRect(0, 0, 35, 37));
-        setScale(0.3,0.3);
+        setTextureRect(sf::IntRect(0, 0, 0, 0));
+        setScale(3,3);
+    }
+    void animate(const sf::Time &elapsed)
+    {
+        float dt = elapsed.asSeconds();
+        t_=t_+dt;
+
+        if(t_>0.1){
+            fragments_index++;
+            t_=0;
+        }
+
+        if(fragments_index>=rectVector.size()){
+            fragments_index=0;
+        }
+
+        setTextureRect(rectVector[fragments_index]);
+    }
+
+    void add_animation_frame(const sf::IntRect& frame)
+    {
+        rectVector.push_back(frame);
+    }
+
+    void setPlayerPosition(const sf::Vector2f& position)
+    {
+        playerPosition_ = position;
+    }
+
+    void followPlayer(float deltaTime)
+    {
+        sf::Vector2f currentPosition = getPosition();
+        sf::Vector2f direction = playerPosition_ - currentPosition - sf::Vector2f(33, 42);
+        float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+        if (length != 0) {
+            direction /= length;
+        }
+
+        sf::Vector2f newPosition = currentPosition + direction * speed * deltaTime;
+        setPosition(newPosition);
+    }
+
+    void die_monster(const sf::Vector2f& playerPosition, float distance)
+    {
+        float angle = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2 * M_PI;
+        float offsetX = std::cos(angle) * distance;
+        float offsetY = std::sin(angle) * distance;
+        sf::Vector2f newPosition = playerPosition + sf::Vector2f(offsetX, offsetY);
+        setPosition(newPosition);
     }
 
 private:
-    float frameTime_;
-    float totalTime_;
-    int currentFrame_;
-    sf::Texture texture_;
+    float speed = 50 + static_cast<float>(rand())/( static_cast <float> (RAND_MAX/(100-15)));
+    float t_=0.0;
+    unsigned int fragments_index = 0;
     sf::Vector2f playerPosition_;
-    std::vector<sf::Texture> frames_;
+    sf::Texture texture_;
+    std::vector<sf::IntRect> rectVector;
 };
 
 class serce : public sf::Sprite
 {
-private:
-    sf::Texture texture_;
+
 public:
     serce(const std::string& path)
     {
@@ -333,9 +378,9 @@ public:
             std::cerr << "Could not load texture" << path << std::endl;
         }
         setTexture(texture_);
-
     }
-
+private:
+    sf::Texture texture_;
 };
 
 void displayBoundingBox(const sf::Sprite& sprite, sf::RenderWindow& window)
@@ -354,6 +399,8 @@ void displayBoundingBox(const sf::Sprite& sprite, sf::RenderWindow& window)
 
 int main()
 {
+    int Score=0;
+    bool intersectionOccurred = false;
 
     sf::RenderWindow window(sf::VideoMode(800, 600), "My window");
     sf::Clock clock;
@@ -364,15 +411,15 @@ int main()
 
     CustomSprite guy("character.png");
 
-    guy.add_animation_frame_stand(sf::IntRect(0, 0, 50, 37)); // hero standing frame 1
-    guy.add_animation_frame_stand(sf::IntRect(50, 0, 50, 37)); // hero standing frame 2
-    guy.add_animation_frame_stand(sf::IntRect(100, 0, 50, 37)); // hero standing frame 3
-    guy.add_animation_frame(sf::IntRect(150, 0, 37, 37)); // hero running frame 1
-    guy.add_animation_frame(sf::IntRect(200, 0, 37, 37)); // hero running frame 1
-    guy.add_animation_frame(sf::IntRect(250, 0, 37, 37)); // hero running frame 1
-    guy.add_animation_frame(sf::IntRect(300, 0, 37, 37)); // hero running frame 1
-    guy.add_animation_frame(sf::IntRect(350, 0, 37, 37)); // hero running frame 1
-    guy.add_animation_frame(sf::IntRect(400, 0, 37, 37)); // hero running frame 1
+    guy.add_animation_frame_stand(sf::IntRect(15, 6, 22, 30)); // hero standing frame 1
+    guy.add_animation_frame_stand(sf::IntRect(65, 6, 22, 30)); // hero standing frame 2
+    guy.add_animation_frame_stand(sf::IntRect(115, 6, 22, 30)); // hero standing frame 3
+    guy.add_animation_frame(sf::IntRect(165, 6, 22, 30)); // hero running frame 1
+    guy.add_animation_frame(sf::IntRect(215, 6, 22, 30)); // hero running frame 1
+    guy.add_animation_frame(sf::IntRect(265, 6, 22, 30)); // hero running frame 1
+    guy.add_animation_frame(sf::IntRect(315, 6, 22, 30)); // hero running frame 1
+    guy.add_animation_frame(sf::IntRect(365, 6, 22, 30)); // hero running frame 1
+    guy.add_animation_frame(sf::IntRect(415, 6, 22, 30)); // hero running frame 1
 
     sf::Sprite grass;
     grass.setTexture(texture_wall);
@@ -381,62 +428,43 @@ int main()
     grass.setScale(1.5,1.5);
     grass.setTextureRect(sf::IntRect(0, 0, 1500, 1500));
 
-    int Score=0;
     WeaponSprite knife("knife.png");
 
     AxeSprite axe("axe.png");
 
     FireballSprite fireb("fireball.png");
-    fireb.add_animation_frame(sf::IntRect(9, 275, 56, 25));
-    fireb.add_animation_frame(sf::IntRect(71, 275, 57, 25));
-    fireb.add_animation_frame(sf::IntRect(135, 275, 57, 25));
-    fireb.add_animation_frame(sf::IntRect(194, 275, 61, 25));
-    fireb.add_animation_frame(sf::IntRect(266, 275, 53, 25));
-    fireb.add_animation_frame(sf::IntRect(325, 275, 58, 25));
-    fireb.add_animation_frame(sf::IntRect(392, 275, 55, 25));
-    fireb.add_animation_frame(sf::IntRect(454, 275, 58, 25));
+    fireb.add_animation_frame(sf::IntRect(40, 68, 400, 400));
+    fireb.add_animation_frame(sf::IntRect(540, 68, 400, 400));
+    fireb.add_animation_frame(sf::IntRect(1040, 68, 400, 400));
+    fireb.add_animation_frame(sf::IntRect(1540, 68, 400, 400));
+    fireb.add_animation_frame(sf::IntRect(2040, 68, 400, 400));
+    fireb.add_animation_frame(sf::IntRect(2540, 68, 400, 400));
 
-    /*remember to change it to more effective*/
+//    MonsterSprite zombie("monster.png");
+//    zombie.add_animation_frame(sf::IntRect(5, 70, 26, 29));
+//    zombie.add_animation_frame(sf::IntRect(35, 70, 26, 29));
+//    zombie.add_animation_frame(sf::IntRect(66, 70, 26, 29));
+//    zombie.add_animation_frame(sf::IntRect(100, 70, 26, 29));
+//    zombie.add_animation_frame(sf::IntRect(133, 70, 26, 29));
+//    zombie.add_animation_frame(sf::IntRect(166, 70, 26, 29));
+//    zombie.add_animation_frame(sf::IntRect(196, 70, 26, 29));
+
+    MonsterSprite zombie("monster.png");
+    zombie.add_animation_frame(sf::IntRect(5, 70, 26, 29));
+    zombie.add_animation_frame(sf::IntRect(35, 70, 26, 29));
+    zombie.add_animation_frame(sf::IntRect(66, 70, 26, 29));
+    zombie.add_animation_frame(sf::IntRect(100, 70, 26, 29));
+    zombie.add_animation_frame(sf::IntRect(133, 70, 26, 29));
+    zombie.add_animation_frame(sf::IntRect(166, 70, 26, 29));
+    zombie.add_animation_frame(sf::IntRect(196, 70, 26, 29));
+
+    std::vector<MonsterSprite> sprites;
+
+    for(int i=0; i<35; i++){
+        sprites.push_back(zombie);
+    }
+
     std::vector<sf::Sprite> walls;
-    std::vector<std::string> framePaths = {
-            "go_1.png",
-            "go_2.png",
-            "go_3.png",
-            "go_4.png",
-            "go_5.png",
-            "go_6.png",
-            "go_7.png",
-            "go_8.png",
-            "go_9.png",
-            "go_10.png"
-       };
-
-    std::vector<std::string> framePaths1 = {
-            "die_1.png",
-            "die_2.png",
-            "die_3.png",
-            "die_4.png",
-            "die_5.png",
-            "die_6.png"
-       };
-
-    MonsterSprite Monster1(framePaths, 0.2f);
-    MonsterSprite Monster2(framePaths, 0.2f);
-    MonsterSprite Monster3(framePaths, 0.2f);
-    MonsterSprite Monster4(framePaths, 0.2f);
-    MonsterSprite Monster5(framePaths, 0.2f);
-    MonsterSprite Monster6(framePaths, 0.2f);
-    MonsterSprite Monster7(framePaths, 0.2f);
-    MonsterSprite Monster8(framePaths, 0.2f);
-
-    MonsterSprite monsterdead(framePaths1, 0.2f);
-
-    Monster1.setPosition(10,10);
-    Monster2.setPosition(10,210);
-    Monster3.setPosition(10,510);
-    Monster4.setPosition(700,10);
-    Monster5.setPosition(700,210);
-    Monster6.setPosition(700,410);
 
     serce serce1("heart.png");
     serce serce2("heart.png");
@@ -457,19 +485,10 @@ int main()
     serca.push_back(serce4);
     serca.push_back(serce5);
 
-    std::vector<monster> zombies;
-    zombies.push_back(Monster1);
-    zombies.push_back(Monster2);
-    zombies.push_back(Monster3);
-    zombies.push_back(Monster4);
-    zombies.push_back(Monster5);
-    zombies.push_back(Monster6);
-
     bool IsKnife=false;
     bool IsAxe=true;
     bool IsFireb=false;
-    bool intersectionOccurred = false;
-    int zycia=0;
+    int lives=0;
 
     sf::Font font;
     if (!font.loadFromFile("arial.ttf")) {
@@ -481,7 +500,7 @@ int main()
     scoreText.setFont(font);
     scoreText.setCharacterSize(30);
     scoreText.setFillColor(sf::Color::White);
-    scoreText.setPosition(300,10);
+    scoreText.setPosition(340,10);
 
     sf::Text ExitText;
 
@@ -495,19 +514,29 @@ int main()
         sf::Time elapsed = clock.restart();
 
         float dt=elapsed.asSeconds();
-        float counter=counter+dt;
-        std::cout<<counter<<std::endl;
+        float counter_fireb=counter_fireb+dt;
+        float counter_knife=counter_knife+dt;
 
-        if(counter>2.0 && !IsFireb){
+        if(counter_fireb>5.0 && !IsFireb){
+            fireb.setScale(0.25, 0.25);
             float angle=static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2 * M_PI;
             IsFireb=true;
-            counter=0;
-            fireb.setPosition(guy.getPosition()+sf::Vector2f(10,-65));
-            fireb.setScale(3,3);
+            counter_fireb=0;
+            fireb.setPosition(guy.getPosition());
             speed_x_fb=250*cos(angle);
             speed_y_fb=250*sin(angle);
             float rotation = std::atan2(sin(angle), cos(angle)) * 180.f / static_cast<float>(M_PI);
             fireb.setRotation(rotation);
+        }
+        if(counter_knife>0.1 && !IsKnife){
+            float angle=static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2 * M_PI;
+            IsKnife=true;
+            counter_knife=0;
+            knife.setPosition(guy.getPosition());
+            speed_x=2000*cos(angle);
+            speed_y=2000*sin(angle);
+            float rotation = std::atan2(sin(angle), cos(angle)) * 180.f / static_cast<float>(M_PI);
+            knife.setRotation(rotation);
         }
 
         sf::Event event;
@@ -524,81 +553,17 @@ int main()
                 std::cout<<"Flag state:"<<IsKnife<<std::endl;
                 window.close();
             }
-            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::W && !IsKnife)
-            {
-                IsKnife=true;
-                knife.setPosition(guy.getPosition()+sf::Vector2f(-45,-50));
-                knife.setScale(0.15,-0.15);
-                knife.setRotation(-314);
-                speed_y=-750;
-                speed_x=0;
-            }
-            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S && !IsKnife)
-            {
-                IsKnife=true;
-                knife.setPosition(guy.getPosition()+sf::Vector2f(40,15));
-                knife.setScale(0.15,-0.15);
-                knife.setRotation(225);
-                speed_y=750;
-                speed_x=0;
-
-            }
-            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A && !IsKnife)
-            {
-                IsKnife=true;
-                knife.setPosition(guy.getPosition()+sf::Vector2f(-20,-65));
-                knife.setScale(0.15, 0.15);
-                knife.setRotation(40);
-                speed_x=-750;
-                speed_y=0;
-
-            }
-            if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::D && !IsKnife)
-            {
-                IsKnife=true;
-                knife.setPosition(guy.getPosition()+sf::Vector2f(10,-65));
-                knife.setScale(0.15,-0.15);
-                knife.setRotation(130);
-                speed_x=750;
-                speed_y=0;
-
-            }
         }
+
         sf::FloatRect guy_bounds = guy.getGlobalBounds();
-
         bool currentIntersection = false;
+        float counter_lives=counter_lives+dt;
 
-            for (auto& monster : zombies)
-            {
-                sf::FloatRect monster_bounds = monster.getGlobalBounds();
-                if (monster_bounds.intersects(guy_bounds))
-                {
-                    currentIntersection = true;
-                    break;
-                }
-            }
+        sf::Vector2f position;
+        sf::FloatRect knife_bounds = knife.getGlobalBounds();
+        sf::FloatRect axe_bounds = axe.getGlobalBounds();
+        sf::FloatRect fireball_bounds = fireb.getGlobalBounds();
 
-            if (currentIntersection && !intersectionOccurred)
-            {
-                intersectionOccurred = true;
-
-                if (zycia < 5)
-                {
-                    serca[zycia].setScale(0, 0);
-                    zycia++;
-                }
-
-                if (zycia == 5)
-                {
-                    std::cout << "Your score is: " << Score << " ";
-                    // Print the score or perform any other desired actions
-                    window.close();
-                }
-            }
-            else if (!currentIntersection)
-            {
-                intersectionOccurred = false;
-            }
 
         sf::Vector2f knife_pos = knife.getPosition();
         sf::Vector2u window_pos = window.getSize();
@@ -622,13 +587,6 @@ int main()
         window.draw(grass);
         window.draw(guy);
 
-        for (auto& monster : zombies) {
-                monster.setPlayerPosition(guy.getPosition());
-                monster.followPlayer(dt, monster.speed);
-                monster.animate(dt);
-                window.draw(monster);
-            }
-
         for (auto &serce: serca)
         {
             window.draw(serce);
@@ -637,6 +595,7 @@ int main()
         if(IsKnife)
         {
             window.draw(knife);
+            displayBoundingBox(knife, window);
         }
         if(IsAxe)
         {
@@ -650,35 +609,63 @@ int main()
             window.draw(fireb);
         }
 
-        sf::Vector2f position;
-        sf::FloatRect knife_bounds = knife.getGlobalBounds();
-        sf::FloatRect axe_bounds = axe.getGlobalBounds();
-        for (auto& monster : zombies)
-        {
-            sf::FloatRect monster_bounds = monster.getGlobalBounds();
+        displayBoundingBox(guy, window);
+        displayBoundingBox(fireb, window);
+        displayBoundingBox(axe, window);
 
-            if (monster_bounds.intersects(knife_bounds))
+        for(auto& sprite : sprites){
+            sf::FloatRect monster_bounds = sprite.getGlobalBounds();
+            if (monster_bounds.intersects(guy_bounds) && counter_lives>1.0)
+            {
+                currentIntersection = true;
+                counter_lives=0;
+            }
+
+            if (currentIntersection && !intersectionOccurred)
+            {
+                intersectionOccurred = true;
+
+                if (lives < 5)
+                {
+                    serca[lives].setScale(0, 0);
+                    lives++;
+                }
+
+                if (lives == 5)
+                {
+                    std::cout << "Your score is: " << Score << " ";
+                    // Print the score or perform any other desired actions
+                    window.close();
+                }
+            }
+            else if (!currentIntersection)
+            {
+                intersectionOccurred = false;
+            }
+            if (monster_bounds.intersects(knife_bounds) && IsKnife==true)
             {
                 Score += 20;
-                monster.die_monster(guy.getPosition(),400);
+                sprite.die_monster(guy.getPosition(),400);
+                IsKnife = false;
+            }
+
+            if (monster_bounds.intersects(fireball_bounds))
+            {
+                Score += 20;
+                sprite.die_monster(guy.getPosition(),400);
             }
 
             if (monster_bounds.intersects(axe_bounds))
             {
-                monster.die_monster(guy.getPosition(),400);
+                sprite.die_monster(guy.getPosition(),400);
                 Score += 50;
             }
+            sprite.setPlayerPosition(guy.getPosition());
+            sprite.followPlayer(dt);
+            sprite.animate(elapsed);
+            displayBoundingBox(sprite, window); //hitboxes of zombies
+            window.draw(sprite);
         }
-
-        displayBoundingBox(guy, window);
-        displayBoundingBox(fireb, window);
-        displayBoundingBox(knife, window);
-        displayBoundingBox(axe, window);
-//        displayBoundingBox(Monster1, window);
-//        displayBoundingBox(Monster2, window);
-//        displayBoundingBox(Monster3, window);
-//        displayBoundingBox(Monster4, window);
-//        displayBoundingBox(Monster5, window);
 
         std::string scoreString = "Score: " + std::to_string(Score);
         std::string exitString = "Press Esc to exit";
