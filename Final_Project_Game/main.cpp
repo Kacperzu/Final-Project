@@ -309,6 +309,7 @@ public:
         setTexture(texture_);
         setTextureRect(sf::IntRect(0, 0, 0, 0));
         setScale(3,3);
+        setOrigin(10,10);
     }
     void animate(const sf::Time &elapsed)
     {
@@ -344,6 +345,12 @@ public:
         float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
         if (length != 0) {
             direction /= length;
+        }
+        if(direction.x<0){
+            setScale(-3,3);
+        }
+        if(direction.x>0){
+            setScale(3,3);
         }
 
         sf::Vector2f newPosition = currentPosition + direction * speed * deltaTime;
