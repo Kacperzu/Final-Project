@@ -177,21 +177,31 @@ public:
             && rectangle_bounds.top > bound_top && bottom != true)
         {
             move(m_speed_x*0, m_speed_y*-dt);
-            animate(elapsed);
+            if((sf::Keyboard::isKeyPressed(sf::Keyboard::Right)
+                 || sf::Keyboard::isKeyPressed(sf::Keyboard::Left)
+                 || sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) != true){
+                animate(elapsed);
+            }
         }
 
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)
             && rectangle_bounds.height + rectangle_bounds.top <= bound_bottom && top != true)
         {
             move(m_speed_x*0, m_speed_y*dt);
-            animate(elapsed);
+            if((sf::Keyboard::isKeyPressed(sf::Keyboard::Right)
+                 || sf::Keyboard::isKeyPressed(sf::Keyboard::Left)
+                 || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) != true){
+                animate(elapsed);
+            }
         }
 
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)
             && rectangle_bounds.left > bound_left && right != true)
         {
             move(m_speed_x*-dt, m_speed_y*0);
-            animate(elapsed);
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right) != true){
+                animate(elapsed);
+            }
             setScale(-2,2);
         }
 
@@ -490,7 +500,7 @@ int main()
     int lives=0;
 
     sf::Font font;
-    if (!font.loadFromFile("arial.ttf")) {
+    if (!font.loadFromFile("minecraft.ttf")) {
         // Error handling - Failed to load the font
         // Make sure the font file name and extension are correct
     }
@@ -523,8 +533,8 @@ int main()
             counter=0;
         }
 
-        if(counter_fireb>5.0 && !IsFireb){
-            fireb.setScale(0.25, 0.25);
+        if(counter_fireb>3.0 && !IsFireb){
+            fireb.setScale(0.2, 0.2);
             float angle=static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2 * M_PI;
             IsFireb=true;
             counter_fireb=0;
@@ -607,7 +617,7 @@ int main()
         {
             axe.setPosition(guy.getPosition());
             window.draw(axe);
-            axe.rotate(0.01);
+            axe.rotate(0.05);
         }
 
         if(IsFireb)
