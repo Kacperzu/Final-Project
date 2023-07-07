@@ -10,6 +10,7 @@ int speed_x=0;
 int speed_y=0;
 int speed_x_fb=0;
 int speed_y_fb=0;
+int zombie_amount=1;
 
 class CustomSprite : public sf::Sprite
 {
@@ -265,7 +266,7 @@ public:
         }
         setTexture(texture_);
         setTextureRect(sf::IntRect(0, 0, 0, 0));
-        setScale(0.1, 0.1);
+        setScale(0, 0);
     }
     void animate(const sf::Time &elapsed){
         float dt = elapsed.asSeconds();
@@ -440,15 +441,6 @@ int main()
     fireb.add_animation_frame(sf::IntRect(2040, 68, 400, 400));
     fireb.add_animation_frame(sf::IntRect(2540, 68, 400, 400));
 
-//    MonsterSprite zombie("monster.png");
-//    zombie.add_animation_frame(sf::IntRect(5, 70, 26, 29));
-//    zombie.add_animation_frame(sf::IntRect(35, 70, 26, 29));
-//    zombie.add_animation_frame(sf::IntRect(66, 70, 26, 29));
-//    zombie.add_animation_frame(sf::IntRect(100, 70, 26, 29));
-//    zombie.add_animation_frame(sf::IntRect(133, 70, 26, 29));
-//    zombie.add_animation_frame(sf::IntRect(166, 70, 26, 29));
-//    zombie.add_animation_frame(sf::IntRect(196, 70, 26, 29));
-
     MonsterSprite zombie("monster.png");
     zombie.add_animation_frame(sf::IntRect(5, 70, 26, 29));
     zombie.add_animation_frame(sf::IntRect(35, 70, 26, 29));
@@ -460,9 +452,9 @@ int main()
 
     std::vector<MonsterSprite> sprites;
 
-    for(int i=0; i<35; i++){
-        sprites.push_back(zombie);
-    }
+//    for(int i=0; i<zombie_amount; i++){
+//        sprites.push_back(zombie);
+//    }
 
     std::vector<sf::Sprite> walls;
 
@@ -516,6 +508,13 @@ int main()
         float dt=elapsed.asSeconds();
         float counter_fireb=counter_fireb+dt;
         float counter_knife=counter_knife+dt;
+        float counter=counter+dt;
+
+        if(counter>1.0){
+            sprites.push_back(zombie);
+            zombie.die_monster(guy.getPosition(),600);
+            counter=0;
+        }
 
         if(counter_fireb>5.0 && !IsFireb){
             fireb.setScale(0.25, 0.25);
@@ -533,8 +532,8 @@ int main()
             IsKnife=true;
             counter_knife=0;
             knife.setPosition(guy.getPosition());
-            speed_x=2000*cos(angle);
-            speed_y=2000*sin(angle);
+            speed_x=1000*cos(angle);
+            speed_y=1000*sin(angle);
             float rotation = std::atan2(sin(angle), cos(angle)) * 180.f / static_cast<float>(M_PI);
             knife.setRotation(rotation);
         }
