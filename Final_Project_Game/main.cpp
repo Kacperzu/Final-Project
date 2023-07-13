@@ -15,7 +15,8 @@ int zombie_amount=1;
 class CustomSprite : public sf::Sprite
 {
 public:
-    CustomSprite(const std::string& path) {
+    CustomSprite(const std::string& path)
+    {
 
         if (!texture_.loadFromFile(path)) {
             std::cerr << "Could not load texture" << path << std::endl;
@@ -233,8 +234,8 @@ private:
 class WeaponSprite : public sf::Sprite
 {
 public:
-    WeaponSprite(const std::string& path) {
-
+    WeaponSprite(const std::string& path)
+    {
         if (!texture_.loadFromFile(path)){
             std::cerr << "Could not load texture" << path << std::endl;
         }
@@ -269,8 +270,8 @@ private:
 class FireballSprite : public sf::Sprite
 {
 public:
-    FireballSprite(const std::string& path){
-
+    FireballSprite(const std::string& path)
+    {
         if (!texture_.loadFromFile(path)){
             std::cerr << "Could not load texture" << path << std::endl;
         }
@@ -311,8 +312,8 @@ private:
 class MonsterSprite : public sf::Sprite
 {
 public:
-    MonsterSprite(const std::string& path){
-
+    MonsterSprite(const std::string& path)
+    {
         if (!texture_.loadFromFile(path)) {
             std::cerr << "Could not load texture" << path << std::endl;
         }
@@ -321,6 +322,7 @@ public:
         setScale(3,3);
         setOrigin(10,10);
     }
+
     void animate(const sf::Time &elapsed)
     {
         float dt = elapsed.asSeconds();
@@ -391,7 +393,6 @@ class serce : public sf::Sprite
 public:
     serce(const std::string& path)
     {
-
         if (!texture_.loadFromFile(path)) {
             std::cerr << "Could not load texture" << path << std::endl;
         }
@@ -467,32 +468,36 @@ int main()
     zombie.add_animation_frame(sf::IntRect(166, 70, 26, 29));
     zombie.add_animation_frame(sf::IntRect(196, 70, 26, 29));
 
-    std::vector<MonsterSprite> sprites;
+//    MonsterSprite skeleton("skeleton.png");
+//    skeleton.add_animation_frame(sf::IntRect(40, 68, 102, 256));
+//    skeleton.add_animation_frame(sf::IntRect(540, 68, 102, 256));
+//    skeleton.add_animation_frame(sf::IntRect(1040, 68, 102, 256));
+//    skeleton.add_animation_frame(sf::IntRect(1540, 68, 102, 256));
+//    skeleton.add_animation_frame(sf::IntRect(2040, 68, 102, 256));
+//    skeleton.add_animation_frame(sf::IntRect(2540, 68, 102, 256));
 
-//    for(int i=0; i<zombie_amount; i++){
-//        sprites.push_back(zombie);
-//    }
+    std::vector<MonsterSprite> sprites;
 
     std::vector<sf::Sprite> walls;
 
-    serce serce1("heart.png");
-    serce serce2("heart.png");
-    serce serce3("heart.png");
-    serce serce4("heart.png");
-    serce serce5("heart.png");
+    serce heart1("heart.png");
+    serce heart2("heart.png");
+    serce heart3("heart.png");
+    serce heart4("heart.png");
+    serce heart5("heart.png");
 
-    serce1.setPosition(600, 10);
-    serce2.setPosition(630, 10);
-    serce3.setPosition(660, 10);
-    serce4.setPosition(690, 10);
-    serce5.setPosition(720, 10);
-    std::vector<serce> serca;
+    heart1.setPosition(600, 10);
+    heart2.setPosition(630, 10);
+    heart3.setPosition(660, 10);
+    heart4.setPosition(690, 10);
+    heart5.setPosition(720, 10);
+    std::vector<serce> hearts;
 
-    serca.push_back(serce1);
-    serca.push_back(serce2);
-    serca.push_back(serce3);
-    serca.push_back(serce4);
-    serca.push_back(serce5);
+    hearts.push_back(heart1);
+    hearts.push_back(heart2);
+    hearts.push_back(heart3);
+    hearts.push_back(heart4);
+    hearts.push_back(heart5);
 
     bool IsKnife=false;
     bool IsAxe=true;
@@ -526,6 +531,7 @@ int main()
         float counter_fireb=counter_fireb+dt;
         float counter_knife=counter_knife+dt;
         float counter=counter+dt;
+        float counter_lives=counter_lives+dt;
 
         if(counter>1.0){
             sprites.push_back(zombie);
@@ -544,13 +550,13 @@ int main()
             float rotation = std::atan2(sin(angle), cos(angle)) * 180.f / static_cast<float>(M_PI);
             fireb.setRotation(rotation);
         }
-        if(counter_knife>0.1 && !IsKnife){
+        if(counter_knife>0.5 && !IsKnife){
             float angle=static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) * 2 * M_PI;
             IsKnife=true;
             counter_knife=0;
             knife.setPosition(guy.getPosition());
-            speed_x=1000*cos(angle);
-            speed_y=1000*sin(angle);
+            speed_x=500*cos(angle);
+            speed_y=500*sin(angle);
             float rotation = std::atan2(sin(angle), cos(angle)) * 180.f / static_cast<float>(M_PI);
             knife.setRotation(rotation);
         }
@@ -566,14 +572,12 @@ int main()
             if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)
             {
                 std::cout<<"Closing Window"<<std::endl;
-                std::cout<<"Flag state:"<<IsKnife<<std::endl;
                 window.close();
             }
         }
 
         sf::FloatRect guy_bounds = guy.getGlobalBounds();
         bool currentIntersection = false;
-        float counter_lives=counter_lives+dt;
 
         sf::Vector2f position;
         sf::FloatRect knife_bounds = knife.getGlobalBounds();
@@ -603,9 +607,9 @@ int main()
         window.draw(grass);
         window.draw(guy);
 
-        for (auto &serce: serca)
+        for (auto &heart : hearts)
         {
-            window.draw(serce);
+            window.draw(heart);
         }
 
         if(IsKnife)
@@ -617,7 +621,7 @@ int main()
         {
             axe.setPosition(guy.getPosition());
             window.draw(axe);
-            axe.rotate(0.05);
+            axe.rotate(0.01);
         }
 
         if(IsFireb)
@@ -643,7 +647,7 @@ int main()
 
                 if (lives < 5)
                 {
-                    serca[lives].setScale(0, 0);
+                    hearts[lives].setScale(0, 0);
                     lives++;
                 }
 
