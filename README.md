@@ -1,2 +1,2 @@
-# Final-Project
-Upgraded version of final project of ie - game base on other game called "vampire survivors"
+# Game-Project
+Upgraded version of final project of ie - game based on other game called "vampire survivors"
