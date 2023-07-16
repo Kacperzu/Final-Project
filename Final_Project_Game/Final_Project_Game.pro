@@ -13,4 +13,8 @@ CONFIG(debug, debug|release){
 }
 
 SOURCES += \
-        main.cpp
+        main.cpp \
+        source.cpp
+
+HEADERS += \
+    header.h
